@@ -4,7 +4,9 @@
 
 #include <triangle_matrix.h>
 
-triangle_matrix* create_matrix(size_t size) {
+static size_t calculate_matrix_size(size_t size);
+
+triangle_matrix* create_matrix(const size_t size) {
     if (!size) {
         return NULL;
     }
@@ -42,10 +44,6 @@ int free_matrix(triangle_matrix* matrix) {
     free(matrix);
 
     return SUCCESS;
-}
-
-size_t calculate_matrix_size(size_t size) {
-    return (size * size + size) >> (size_t) 1;
 }
 
 int fill_matrix(triangle_matrix* matrix, FILE* stream) {
@@ -90,3 +88,7 @@ int fill_matrix_consecutive(triangle_matrix* matrix) {
     return SUCCESS;
 }
 
+static size_t calculate_matrix_size(size_t size) {
+    // Сумма арифметической прогрессии
+    return (size * size + size) >> (size_t) 1;
+}

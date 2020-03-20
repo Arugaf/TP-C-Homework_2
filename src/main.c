@@ -3,19 +3,23 @@
 //
 
 #include "triangle_matrix.h"
+
 #include <time.h>
 
 int main() {
     clock_t start = clock();
 
-    triangle_matrix* matrix = create_matrix(DEFAULT_MATRIX_SIZE);
+    triangle_matrix* matrix = create_matrix(1);
     fill_matrix_consecutive(matrix);
-    printf("%ld\n", calculate_diagonal_sum(matrix));
+
+    unsigned long int h = 0;
+    calculate_diagonal_sum(matrix, &h, 5);
+
     free_matrix(matrix);
 
     clock_t end = clock();
 
-    printf("%f", (double)(end - start) / CLOCKS_PER_SEC);
+    printf("%f\n%ld", (double)(end - start) / CLOCKS_PER_SEC, h);
 
     return 0;
 }
