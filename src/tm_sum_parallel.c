@@ -6,7 +6,6 @@
 
 #include <pthread.h>
 #include <stdarg.h>
-#include <unistd.h>
 
 typedef struct {
     size_t begin_i;
@@ -22,6 +21,7 @@ static void* calculate_sum_thread(void* thread_matrix_part) {
                                                 i < ((matrix_part*) thread_matrix_part)->end; ++i, j += i) {
         result += ((matrix_part*) thread_matrix_part)->matrix->elements[i + j] - '0';
     }
+
     return (void*) result;
 }
 
@@ -91,14 +91,20 @@ int calculate_diagonal_sum(triangle_matrix* matrix, unsigned long int* result, .
     for (size_t i = 0; i < number_of_threads; ++i) {
         if (pthread_create(&threads[i], NULL, calculate_sum_thread, (void*) &(matrix_parts[i]))) {
             errflag = true;
+            break;
         }
+    }
 
+    if (errflag) {
+        free(threads);
+        free(sums);
+        free(matrix_parts);
+        return THREAD_CREATION_ERROR;
+    }
+
+    for (size_t i = 0; i < number_of_threads; ++i) {
         if (pthread_join(threads[i], &(sums[i]))) {
             errflag = true;
-        }
-
-        if (errflag) {
-            break;
         }
     }
 

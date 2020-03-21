@@ -16,14 +16,13 @@
 #define MEMORY_ALLOCATION_FAILED -5
 
 #define DEFAULT_MATRIX_SIZE 100000
-#define DEFAULT_NUMBER_OF_THREADS 2
 
 typedef struct {
     size_t size;
     __uint8_t* elements;
 } triangle_matrix;
 
-triangle_matrix* create_matrix(const size_t size);
+triangle_matrix* create_matrix(size_t size);
 int free_matrix(triangle_matrix* matrix);
 
 int fill_matrix(triangle_matrix* matrix, FILE* stream);
