@@ -14,7 +14,7 @@ extern "C" {
 class MatrixCreation : public ::testing::Test {
 protected:
     void SetUp() override {
-        library = dlopen("../libTriangle_matrix_dynamic.so", RTLD_LAZY);
+        library = dlopen("./libTriangle_matrix_dynamic.so", RTLD_LAZY);
 
         *(void**)(&create_matrix) = dlsym(library, "create_matrix");
         *(void**)(&free_matrix) = dlsym(library, "free_matrix");
@@ -35,7 +35,6 @@ TEST_F(MatrixCreation, IncorrectSize) {
     EXPECT_EQ(create_matrix(matrix_size), nullptr);
 }
 
-
 TEST_F(MatrixCreation, CorrectData) {
     const size_t matrix_size = 10;
     auto matrix = (triangle_matrix*)create_matrix(matrix_size);
@@ -55,7 +54,7 @@ TEST_F(MatrixCreation, CorrectData) {
 class MatrixFreeing : public ::testing::Test {
 protected:
     void SetUp() override {
-        library = dlopen("../libTriangle_matrix_dynamic.so", RTLD_LAZY);
+        library = dlopen("./libTriangle_matrix_dynamic.so", RTLD_LAZY);
 
         *(void**)(&create_matrix) = dlsym(library, "create_matrix");
         *(void**)(&free_matrix) = dlsym(library, "free_matrix");
@@ -75,7 +74,6 @@ TEST_F(MatrixFreeing, NoMatrix) {
     EXPECT_EQ((long int)(free_matrix)(nullptr), INVALID_POINTER);
 }
 
-
 TEST_F(MatrixFreeing, NoElements) {
     auto matrix = (triangle_matrix*)malloc(sizeof(triangle_matrix));
     matrix->elements = nullptr;
@@ -94,7 +92,7 @@ TEST_F(MatrixFreeing, CorrectData) {
 class MatrixFilling : public ::testing::Test {
 protected:
     void SetUp() override {
-        library = dlopen("../libTriangle_matrix_dynamic.so", RTLD_LAZY);
+        library = dlopen("./libTriangle_matrix_dynamic.so", RTLD_LAZY);
 
         *(void**)(&create_matrix) = dlsym(library, "create_matrix");
         *(void**)(&free_matrix) = dlsym(library, "free_matrix");
@@ -181,7 +179,7 @@ TEST_F(MatrixFilling, CorrectData) {
 class MatrixFillingCons : public ::testing::Test {
 protected:
     void SetUp() override {
-        library = dlopen("../libTriangle_matrix_dynamic.so", RTLD_LAZY);
+        library = dlopen("./libTriangle_matrix_dynamic.so", RTLD_LAZY);
 
         *(void**)(&create_matrix) = dlsym(library, "create_matrix");
         *(void**)(&free_matrix) = dlsym(library, "free_matrix");
@@ -236,7 +234,7 @@ TEST_F(MatrixFillingCons, CorrectData) {
 class CalculateSum : public ::testing::Test {
 protected:
     void SetUp() override {
-        library = dlopen("../libTriangle_matrix_dynamic.so", RTLD_LAZY);
+        library = dlopen("./libTriangle_matrix_dynamic.so", RTLD_LAZY);
 
         *(void**)(&create_matrix) = dlsym(library, "create_matrix");
         *(void**)(&free_matrix) = dlsym(library, "free_matrix");

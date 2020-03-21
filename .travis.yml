@@ -1,0 +1,50 @@
+sudo: required
+dist: trusty
+
+branches:
+  only:
+    - /.*/
+
+language: c
+
+os: linux
+
+compiler:
+  - gcc
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - cmake
+      - gcc-7
+      - g++-7
+      - valgrind
+      - cppcheck
+      - lcov
+
+script:
+  - pip install --user cpp-coveralls
+  - sudo apt remove cmake
+  - pip install cmake --upgrade
+  - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
+  - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
+  - export CC=/usr/bin/gcc-7
+  - export CXX=/usr/bin/g++-7
+  - mkdir -p build
+  - cd build
+  - cmake -DENABLE_COVERAGE=ON -DCMAKE_CXX_COMPILER="g++-7" ..
+  - make
+  - valgrind --tool=memcheck --leak-check=full --leak-resolution=med ./unit_tests/triangle_matrix_test_static
+  - valgrind --tool=memcheck --leak-check=full --leak-resolution=med ./unit_tests/triangle_matrix_test_dynamic
+  - cppcheck --enable=all --std=c11 --check-config --suppress=missingIncludeSystem -I ../include ../src -I ../time_tests/include ../time_tests/src
+  - ./time_test_consecutive
+  - CORES=`lscpu -p=cpu | grep -o '[0-9]' | wc -l`
+  - ./time_test_parallel 0 0 ${CORES}
+  - valgrind --tool=memcheck --leak-check=full --leak-resolution=med ./time_test_consecutive 1000 1000
+  - valgrind --tool=memcheck --leak-check=full --leak-resolution=med ./time_test_parallel 1000 1000 4
+  - cat time_stat.txt
+
+after_success:
+  - coveralls --root .. --build-root . -E ".*CMakeFiles.*" -E ".*googletest*" --gcov /usr/bin/gcov --gcov-options '\-lp'
