@@ -8,6 +8,11 @@ project(${project_name})
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "-ldl -pthread -Wall -Werror -Wpedantic")
 
+if(ENABLE_COVERAGE)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage -lgcov")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lgcov --coverage")
+endif()
+
 # Includes
 set(includes ${PROJECT_SOURCE_DIR}/include)
 include_directories(${includes})
@@ -16,6 +21,7 @@ set(includes_time_test ${PROJECT_SOURCE_DIR}/time_tests/include)
 
 # Sources
 set(sources ${PROJECT_SOURCE_DIR}/src)
+
 set(src_files_lib ${sources}/triangle_matrix.c)
 set(src_files_static ${sources}/tm_sum_cons.c)
 set(src_files_dynamic ${sources}/tm_sum_parallel.c)
@@ -37,3 +43,8 @@ target_include_directories(time_test_parallel PUBLIC ${PROJECT_SOURCE_DIR}/time_
 add_executable(time_test_consecutive ${src_files_test_common} ${src_files_test_static})
 target_link_libraries(time_test_consecutive ${project_name}_static)
 target_include_directories(time_test_consecutive PUBLIC ${PROJECT_SOURCE_DIR}/time_tests/include)
+
+# Tests
+enable_testing()
+add_subdirectory(googletest)
+add_subdirectory(unit_tests)

@@ -51,10 +51,10 @@ int main(int argc, char** argv) {
         return FAILED_TO_OPEN_LIBRARY;
     }
 
-    void* (*create_matrix)(const size_t size);
-    void* (*free_matrix)(triangle_matrix* matrix);
-    void* (*fill_matrix_consecutive)(triangle_matrix* matrix);
-    void* (*calculate_diagonal_sum)(triangle_matrix* matrix, unsigned long int* result, ...);
+    void* (*create_matrix)(const size_t size) = NULL;
+    void* (*free_matrix)(triangle_matrix* matrix) = NULL;
+    void* (*fill_matrix_consecutive)(triangle_matrix* matrix) = NULL;
+    void* (*calculate_diagonal_sum)(triangle_matrix* matrix, unsigned long int* result, ...) = NULL;
 
     *(void**)(&create_matrix) = dlsym(library, "create_matrix");
     if (!create_matrix) {
