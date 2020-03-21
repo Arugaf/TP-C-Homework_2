@@ -26,10 +26,6 @@ addons:
       - lcov
       - python3.7
 
-before_script:
-  - sudo pip install --upgrade pip
-  - sudo -H pip install --upgrade requests[security]
-
 script:
   - pip install --user cpp-coveralls
   - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
