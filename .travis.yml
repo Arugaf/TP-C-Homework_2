@@ -24,10 +24,15 @@ addons:
       - cppcheck
       - lcov
 
-script:
-  - sudo apt-get install python3.7
+before_script:
+  - sudo apt update
+  - sudo apt install software-properties-common
+  - sudo add-apt-repository ppa:deadsnakes/ppa
+  - sudo apt install python3.7
   - sudo pip install --upgrade pip
   - sudo -H pip install --upgrade requests[security]
+
+script:
   - pip install --user cpp-coveralls
   - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
   - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
