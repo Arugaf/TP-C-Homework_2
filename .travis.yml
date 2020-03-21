@@ -11,6 +11,8 @@ os: linux
 
 compiler:
   - gcc
+  
+python: 2.7.7
 
 addons:
   apt:
@@ -24,10 +26,12 @@ addons:
       - valgrind
       - cppcheck
       - lcov
-      - python3.7
+
+before_script:
+  - sudo -H pip install --upgrade requests[security]
+  - pip install --user cpp-coveralls
 
 script:
-  - pip install --user cpp-coveralls
   - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
   - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
   - export CC=/usr/bin/gcc-7
@@ -47,4 +51,4 @@ script:
   - cat time_stat.txt
 
 after_success:
-  - coveralls --root .. --build-root . -E ".*CMakeFiles.*" -E ".*googletest*" --gcov /usr/bin/gcov --gcov-options '\-lp'
+  - coveralls --build-root . --root .. --exclude ".*CMakeFiles.*" --exclude ".*googletest*" --gcov-options '\-lp'
