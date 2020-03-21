@@ -16,6 +16,7 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
+      - deadsnakes
     packages:
       - cmake
       - gcc-7
@@ -23,13 +24,14 @@ addons:
       - valgrind
       - cppcheck
       - lcov
+      - python3.7
 
-before_script:
-  - sudo apt install software-properties-common
-  - sudo add-apt-repository ppa:deadsnakes/ppa
-  - sudo apt install python3.7
-  - sudo pip install --upgrade pip
-  - sudo -H pip install --upgrade requests[security]
+#before_script:
+#  - sudo apt install software-properties-common
+#  - sudo add-apt-repository
+#  - sudo apt install python3.7
+#  - sudo pip install --upgrade pip
+#  - sudo -H pip install --upgrade requests[security]
 
 script:
   - pip install --user cpp-coveralls
