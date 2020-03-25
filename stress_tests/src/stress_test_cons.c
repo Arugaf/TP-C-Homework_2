@@ -2,7 +2,7 @@
 // Created by arugaf on 21.03.2020.
 //
 
-#include "time_test.h"
+#include "stress_test.h"
 #include "triangle_matrix.h"
 
 #define EXECUTION_ERROR -3
@@ -11,19 +11,27 @@
 
 int main(int argc, char** argv) {
     size_t number_of_iterations = DEFAULT_NUMBER_OF_ITERATIONS;
-    size_t matrix_size = DEFAULT_MATRIX_SIZE;
+    size_t matrix_size = 0;
 
-    if (argc > 1) {
-        number_of_iterations = strtol(argv[1], NULL, 10);
-        if (number_of_iterations < 1) {
-            number_of_iterations = DEFAULT_NUMBER_OF_ITERATIONS;
-        }
+    if (argc < 3) {
+        return EXECUTION_ERROR;
     }
 
-    if (argc > 2) {
-        matrix_size = strtol(argv[2], NULL, 10);
-        if (matrix_size < 1) {
-            matrix_size = DEFAULT_MATRIX_SIZE;
+    matrix_size = strtol(argv[1], NULL, 10);
+    if (matrix_size < 1) {
+        return INVALID_DATA;
+    }
+
+    const char* matrix_filename = argv[2];
+    FILE* matrix_file = fopen(matrix_filename, "r");
+    if (!matrix_file) {
+        return EXECUTION_ERROR;
+    }
+
+    if (argc > 3) {
+        number_of_iterations = strtol(argv[3], NULL, 10);
+        if (number_of_iterations < 1) {
+            number_of_iterations = DEFAULT_NUMBER_OF_ITERATIONS;
         }
     }
 
@@ -31,13 +39,14 @@ int main(int argc, char** argv) {
     if (!matrix) {
         return MEMORY_ALLOCATION_FAILED;
     }
-    if (fill_matrix_consecutive(matrix)) {
-        free_matrix(matrix);
+
+    if(fill_matrix(matrix, matrix_file)) {
+        free_matrix(&matrix);
         return EXECUTION_ERROR;
     }
 
-    unsigned long int diagonal_sum = 0;
-    double time_sum = 0;
+    long int diagonal_sum = 0;
+    double time_avg = 0;
     double time_min = RAND_MAX;
     double time_max = 0;
     bool errflag = false;
@@ -57,26 +66,26 @@ int main(int argc, char** argv) {
         if (time > time_max) {
             time_max = time;
         }
-        time_sum += time;
+        time_avg += time;
     }
 
     if (errflag) {
-        free_matrix(matrix);
+        free_matrix(&matrix);
         return EXECUTION_ERROR;
     }
 
     char test_type[30] = "consecutive";
 
-    time_sum = time_sum / number_of_iterations;
+    time_avg = time_avg / number_of_iterations;
     time_stat stat = {.iterations = number_of_iterations,
             .test_type = test_type,
             .min = time_min,
             .max = time_max,
-            .avg = time_sum,
+            .avg = time_avg,
             .matrix_size = matrix->size};
-    save_stat(stat, diagonal_sum, "time_stat.txt");
+    save_stat(stat, diagonal_sum, "statistic.txt");
 
-    free_matrix(matrix);
+    free_matrix(&matrix);
 
     return 0;
 }

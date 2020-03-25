@@ -26,7 +26,7 @@ TEST(MatrixCreation, CorrectData) {
         EXPECT_EQ(matrix->elements[i], 0);
     }
 
-    free_matrix(matrix);
+    free_matrix(&matrix);
 }
 
 TEST(MatrixFreeing, NoMatrix) {
@@ -36,7 +36,7 @@ TEST(MatrixFreeing, NoMatrix) {
 TEST(MatrixFreeing, NoElements) {
     auto matrix = (triangle_matrix*)malloc(sizeof(triangle_matrix));
     matrix->elements = nullptr;
-    EXPECT_EQ(free_matrix(matrix), INVALID_POINTER);
+    EXPECT_EQ(free_matrix(&matrix), INVALID_POINTER);
 }
 
 TEST(MatrixFreeing, CorrectData) {
@@ -45,7 +45,7 @@ TEST(MatrixFreeing, CorrectData) {
 
     ASSERT_TRUE(matrix);
 
-    EXPECT_EQ(free_matrix(matrix), SUCCESS);
+    EXPECT_EQ(free_matrix(&matrix), SUCCESS);
 }
 
 TEST(MatrixFilling, NoMatrix) {
@@ -56,7 +56,7 @@ TEST(MatrixFilling, NoElements) {
     auto matrix = (triangle_matrix*)malloc(sizeof(triangle_matrix));
     matrix->elements = nullptr;
     EXPECT_EQ(fill_matrix(matrix, stdin), INVALID_POINTER);
-    free(matrix);
+    free_matrix(&matrix);
 }
 
 TEST(MatrixFilling, InvalidData) {
@@ -69,7 +69,6 @@ TEST(MatrixFilling, InvalidData) {
     FILE* test_file = fopen(filename, "w");
     ASSERT_TRUE(test_file);
 
-    fprintf(test_file, "1, 6");
     fclose(test_file);
 
     test_file = fopen(filename, "r");
@@ -78,7 +77,7 @@ TEST(MatrixFilling, InvalidData) {
     EXPECT_EQ(fill_matrix(matrix, test_file), INVALID_DATA);
     fclose(test_file);
 
-    free_matrix(matrix);
+    free_matrix(&matrix);
 }
 
 TEST(MatrixFilling, CorrectData) {
@@ -87,15 +86,21 @@ TEST(MatrixFilling, CorrectData) {
 
     ASSERT_TRUE(matrix);
 
-    const char* filename = "filling_matrix_invalid_data.txt";
+    const char* filename = "filling_matrix_correct_data.txt";
     FILE* test_file = fopen(filename, "w");
     ASSERT_TRUE(test_file);
 
-    const __uint8_t test_string[] = {'2',
-                                     '3', '0',
-                                     '2', '0', '3',
-                                     '1', '0', '3', '2',
-                                     '2', '2', '2', '3', '1'};
+    const unsigned char test_string[] = {'2',
+                                         '3', '0',
+                                         '2', '0', '3',
+                                         '1', '0', '3', '2',
+                                         '2', '2', '2', '3', '1'};
+    const unsigned char control_string[] = {'2', '0', '3', '2', '1',
+                                            '3',
+                                            '2', '0',
+                                            '1', '0', '3',
+                                            '2', '2', '2', '3'};
+
     fprintf(test_file, "%s", test_string);
     fclose(test_file);
 
@@ -108,45 +113,12 @@ TEST(MatrixFilling, CorrectData) {
     size_t matrix_array_size = (matrix_size * matrix_size + matrix_size) >> (size_t) 1;
 
     for (size_t i = 0; i < matrix_array_size; ++i) {
-        EXPECT_EQ(matrix->elements[i], test_string[i]);
+        EXPECT_EQ(matrix->elements[i], control_string[i]);
     }
 
-    free_matrix(matrix);
+    free_matrix(&matrix);
 }
 
-TEST(MatrixFillingCons, NoMatrix) {
-    EXPECT_EQ(fill_matrix_consecutive(nullptr), INVALID_POINTER);
-}
-
-TEST(MatrixFillingCons, NoElements) {
-    auto matrix = (triangle_matrix*)malloc(sizeof(triangle_matrix));
-    matrix->elements = nullptr;
-    EXPECT_EQ(fill_matrix_consecutive(matrix), INVALID_POINTER);
-    free(matrix);
-}
-
-TEST(MatrixFillingCons, CorrectData) {
-    const size_t matrix_size = 5;
-    triangle_matrix* matrix = create_matrix(matrix_size);
-
-    ASSERT_TRUE(matrix);
-
-    const __uint8_t test_string[] = {'0',
-                                     '1', '2',
-                                     '3', '0', '1',
-                                     '2', '3', '0', '1',
-                                     '2', '3', '0', '1', '2'};
-
-    ASSERT_EQ(fill_matrix_consecutive(matrix), SUCCESS);
-
-    size_t matrix_array_size = (matrix_size * matrix_size + matrix_size) >> (size_t) 1;
-
-    for (size_t i = 0; i < matrix_array_size; ++i) {
-        EXPECT_EQ(matrix->elements[i], test_string[i]);
-    }
-
-    free_matrix(matrix);
-}
 
 TEST(CalculateSum, NoMatrix) {
     EXPECT_EQ(calculate_diagonal_sum(nullptr, nullptr), INVALID_POINTER);
@@ -154,16 +126,34 @@ TEST(CalculateSum, NoMatrix) {
 
 TEST(CalculateSum, CorrectData) {
     const size_t matrix_size = 5;
-    const unsigned long int sum = 6;
+    const long int sum = 8;
     triangle_matrix* matrix = create_matrix(matrix_size);
 
     ASSERT_TRUE(matrix);
-    ASSERT_EQ(fill_matrix_consecutive(matrix), SUCCESS);
 
-    unsigned long int result = 0;
+    const char* filename = "filling_matrix_correct_data.txt";
+    FILE* test_file = fopen(filename, "w");
+    ASSERT_TRUE(test_file);
+
+    const unsigned char test_string[] = {'2',
+                                         '3', '0',
+                                         '2', '0', '3',
+                                         '1', '0', '3', '2',
+                                         '2', '2', '2', '3', '1'};
+
+    fprintf(test_file, "%s", test_string);
+    fclose(test_file);
+
+    test_file = fopen(filename, "r");
+    ASSERT_TRUE(test_file);
+
+    ASSERT_EQ(fill_matrix(matrix, test_file), SUCCESS);
+
+    long int result = 0;
 
     ASSERT_EQ(calculate_diagonal_sum(matrix, &result), SUCCESS);
     EXPECT_EQ(result, sum);
 
-    free_matrix(matrix);
+    free_matrix(&matrix);
 }
+

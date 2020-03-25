@@ -5,28 +5,35 @@
 #include "triangle_matrix.h"
 
 #include <pthread.h>
-#include <stdarg.h>
+#include <signal.h>
+#include <sys/sysinfo.h>
 
 typedef struct {
-    size_t begin_i;
-    size_t begin_j;
+    size_t begin;
     size_t end;
     triangle_matrix* matrix;
 } matrix_part;
 
 static void* calculate_sum_thread(void* thread_matrix_part) {
-    unsigned long int result = 0;
+    if (!thread_matrix_part) {
+        return (void*) INVALID_PART;
+    }
 
-    for (size_t i = ((matrix_part*) thread_matrix_part)->begin_i, j = ((matrix_part*) thread_matrix_part)->begin_j;
-                                                i < ((matrix_part*) thread_matrix_part)->end; ++i, j += i) {
-        result += ((matrix_part*) thread_matrix_part)->matrix->elements[i + j] - '0';
+    long int result = 0;
+
+    size_t begin = ((matrix_part*) thread_matrix_part)->begin;
+    size_t end = ((matrix_part*) thread_matrix_part)->end;
+    unsigned char* matrix_elements = ((matrix_part*) thread_matrix_part)->matrix->elements;
+
+    for (size_t i = begin; i < end; ++i) {
+        result += matrix_elements[i] - '0';
     }
 
     return (void*) result;
 }
 
 static matrix_part* split_matrix(triangle_matrix* matrix, size_t number_of_threads) {
-    if (!matrix || !matrix->elements) {
+    if (!matrix || !matrix->elements || !number_of_threads) {
         return NULL;
     }
 
@@ -41,8 +48,7 @@ static matrix_part* split_matrix(triangle_matrix* matrix, size_t number_of_threa
     size_t part_size = (size_t) (matrix->size / number_of_threads);
 
     for (size_t i = 0; i < number_of_threads; ++i) {
-        matrix_parts[i].begin_i = begin;
-        matrix_parts[i].begin_j = (begin * begin + begin) >> (size_t) 1;
+        matrix_parts[i].begin = begin;
         matrix_parts[i].end = end;
         matrix_parts[i].matrix = matrix;
 
@@ -58,16 +64,12 @@ static matrix_part* split_matrix(triangle_matrix* matrix, size_t number_of_threa
     return matrix_parts;
 }
 
-int calculate_diagonal_sum(triangle_matrix* matrix, unsigned long int* result, ...) {
+int calculate_diagonal_sum(triangle_matrix* matrix, long int* result) {
     if (!matrix || !matrix->elements || !result) {
         return INVALID_POINTER;
     }
 
-    // Получаем количество потоков
-    va_list list;
-    va_start(list, result);
-    size_t number_of_threads = va_arg(list, size_t);
-    va_end(list);
+    int number_of_threads = get_nprocs();
 
     if (!number_of_threads) {
         return INVALID_DATA;
@@ -91,6 +93,10 @@ int calculate_diagonal_sum(triangle_matrix* matrix, unsigned long int* result, .
     for (size_t i = 0; i < number_of_threads; ++i) {
         if (pthread_create(&threads[i], NULL, calculate_sum_thread, (void*) &(matrix_parts[i]))) {
             errflag = true;
+
+            for (size_t j = 0; j < i; ++j) {
+                pthread_kill(threads[j], 9);
+            }
             break;
         }
     }
@@ -117,7 +123,10 @@ int calculate_diagonal_sum(triangle_matrix* matrix, unsigned long int* result, .
 
     *result = 0;
     for (size_t i = 0; i < number_of_threads; ++i) {
-        *result += (unsigned long int)(sums[i]);
+        if ((long int)sums == INVALID_PART) {
+            break;
+        }
+        *result += (long int)(sums[i]);
     }
 
     free(threads);

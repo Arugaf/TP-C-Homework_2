@@ -2,7 +2,10 @@
 // Created by arugaf on 21.03.2020.
 //
 
-#include "time_test.h"
+#include "stress_test.h"
+#include "triangle_matrix.h"
+
+#define NUMBER_OF_POSSIBLE_VALUES 4
 
 double get_time() {
     struct timespec time;
@@ -34,5 +37,29 @@ void save_stat(time_stat stat, unsigned long int result, const char* filename) {
     fprintf(file, "=================================================================\n\n");
 
     fclose(file);
+}
+
+static size_t calculate_matrix_size(size_t size) {
+    return (size * (size + 1)) >> (size_t) 1;
+}
+
+int create_random_matrix_file(const char* file_name, size_t size) {
+    FILE* matrix = fopen(file_name, "w");
+    if (!matrix) {
+        return INVALID_DATA;
+    }
+
+    size_t matrix_size = calculate_matrix_size(size);
+
+    srandom(time(NULL));
+
+    for (int i = 0; i < matrix_size; ++i) {
+        unsigned char buf = (unsigned char) (random() % NUMBER_OF_POSSIBLE_VALUES + '0');
+        fprintf(matrix,"%c",  buf);
+    }
+
+    fclose(matrix);
+
+    return SUCCESS;
 }
 

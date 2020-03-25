@@ -9,25 +9,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define SUCCESS 0
-#define INVALID_POINTER 2
-#define INVALID_DATA 3
-#define THREAD_CREATION_ERROR 4
-#define MEMORY_ALLOCATION_FAILED 5
-
-#define DEFAULT_MATRIX_SIZE 100000
+enum errors {SUCCESS = 0,
+             INVALID_POINTER = 2,
+             INVALID_DATA = 3,
+             THREAD_CREATION_ERROR = 4,
+             MEMORY_ALLOCATION_FAILED = 5,
+             INVALID_STREAM = 6,
+             INVALID_PART = -1};
 
 typedef struct {
     size_t size;
-    __uint8_t* elements;
+    unsigned char* elements;
 } triangle_matrix;
 
 triangle_matrix* create_matrix(size_t size);
-int free_matrix(triangle_matrix* matrix);
+int free_matrix(triangle_matrix** matrix);
 
 int fill_matrix(triangle_matrix* matrix, FILE* stream);
-int fill_matrix_consecutive(triangle_matrix* matrix);
 
-int calculate_diagonal_sum(triangle_matrix* matrix, unsigned long int* result, ...);
+int calculate_diagonal_sum(triangle_matrix* matrix, long int* result);
 
 #endif //TRIANGLE_MATRIX_TRIANGLE_MATRIX_H
