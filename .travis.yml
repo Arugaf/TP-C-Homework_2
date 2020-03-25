@@ -3,7 +3,7 @@ dist: trusty
 
 branches:
   only:
-    - /.*/
+    - making-hw
 
 language: c
 
@@ -11,6 +11,8 @@ os: linux
 
 compiler:
   - gcc
+
+python: 2.7.7
 
 addons:
   apt:
@@ -24,7 +26,10 @@ addons:
       - valgrind
       - cppcheck
       - lcov
-      - python3.7
+
+before_script:
+  - sudo -H pip install --upgrade requests[security]
+  - pip install --user cpp-coveralls
 
 script:
   - pip install --user cpp-coveralls
@@ -49,4 +54,4 @@ script:
   - valgrind --tool=memcheck --leak-check=full --leak-resolution=med ./stress_test_parallel 100 ${MATRIX_FILENAME} 1
 
 after_success:
-  - coveralls --root .. --build-root . -E ".*CMakeFiles.*" -E ".*googletest*" --gcov /usr/bin/gcov --gcov-options '\-lp'
+  - coveralls --build-root . --root .. --exclude ".*CMakeFiles.*" --exclude ".*googletest*" --gcov-options '\-lp'
