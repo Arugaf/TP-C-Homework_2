@@ -44,7 +44,7 @@ script:
   - valgrind --tool=memcheck --leak-check=full --leak-resolution=med ./unit_tests/triangle_matrix_test_static
   - valgrind --tool=memcheck --leak-check=full --leak-resolution=med ./unit_tests/triangle_matrix_test_dynamic
   - cppcheck --enable=all --std=c11 --check-config --suppress=missingIncludeSystem -I ../include ../src -I ../stress_tests/include ../stress_tests/src
-  - MATRIX_SIZE=100000
+  - MATRIX_SIZE=50000
   - MATRIX_FILENAME="random_matrix.txt"
   - ./create_matrix_file ${MATRIX_SIZE} ${MATRIX_FILENAME}
   - ./stress_test_consecutive ${MATRIX_SIZE} ${MATRIX_FILENAME}
